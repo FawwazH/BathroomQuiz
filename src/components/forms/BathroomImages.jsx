@@ -54,22 +54,30 @@ const BathroomImages = () => {
     setPlan(event.target.value);
   };
 
-  const compressImage = async (file) => {
-    const compressedFile = await new ImageCompressor().compress(file);
-    return compressedFile;
-  };
-
   const handleFileChange = async (event) => {
     const files = event.target.files;
 
-    // Ensure the total number of files is not more than 3
     if (files.length + selectedFiles.length > 3) {
       alert("You can only upload up to 3 images.");
       return;
     }
 
+    const compressOptions = {
+      maxSizeMB: 0.2,
+      maxWidthOrHeight: 800,
+      useWebWorker: true,
+    };
+
     const compressedFiles = await Promise.all(
-      Array.from(files).map(async (file) => await compressImage(file))
+      Array.from(files).map(async (file) => {
+        try {
+          const compressedFile = await imageCompression(file, compressOptions);
+          return compressedFile;
+        } catch (error) {
+          console.error("Error compressing image:", error);
+          return file;
+        }
+      })
     );
 
     setSelectedFiles((prevFiles) => [
@@ -79,23 +87,6 @@ const BathroomImages = () => {
         file: compressedFile,
       })),
     ]);
-
-    // Read the selected image files as data URLs
-    // const fileReaders = Array.from(files).map((file) => {
-    //   const reader = new FileReader();
-    //   return new Promise((resolve) => {
-    //     reader.onloadend = () => resolve(reader.result);
-    //     reader.readAsDataURL(file);
-    //   });
-    // });
-
-    // // Wait for all FileReader promises to resolve and update the selectedFiles state
-    // Promise.all(fileReaders).then((dataURLs) => {
-    //   setSelectedFiles((prevFiles) => [
-    //     ...prevFiles,
-    //     ...dataURLs.map((dataURL, index) => ({ dataURL, file: files[index] })),
-    //   ]);
-    // });
   };
 
   const handleRemoveFile = (index) => {

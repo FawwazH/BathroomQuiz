@@ -39,6 +39,21 @@ const App = () => {
   const [skipped, setSkipped] = React.useState(new Set());
 
   React.useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      // Clear local storage on page reload
+      localStorage.removeItem("selectedFiles");
+      localStorage.removeItem("bathroomImages");
+    };
+
+    // Attach the event listener
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+  React.useEffect(() => {
     if (isStepOptional(activeStep)) {
       dispatch(setValid());
     } else {

@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { useSelector, useDispatch } from "react-redux";
 import { setColorPreference } from "../../store/formSlice";
+import imageCompression from "browser-image-compression";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -29,6 +30,7 @@ const Inspirations = () => {
   React.useEffect(() => {
     // Load files from local storage on component mount
     const storedFiles = JSON.parse(localStorage.getItem("selectedFiles")) || [];
+
     if (!isMounted.current) {
       setSelectedFiles(storedFiles);
       isMounted.current = true;
@@ -40,33 +42,40 @@ const Inspirations = () => {
     localStorage.setItem("selectedFiles", JSON.stringify(selectedFiles));
   }, [selectedFiles]);
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const files = event.target.files;
 
-    // Ensure the total number of files is not more than 3
     if (files.length + selectedFiles.length > 3) {
       alert("You can only upload up to 3 images.");
       return;
     }
 
-    // Read the selected image files as data URLs
-    const fileReaders = Array.from(files).map((file) => {
-      const reader = new FileReader();
-      return new Promise((resolve) => {
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-      });
-    });
+    const compressOptions = {
+      maxSizeMB: 0.2,
+      maxWidthOrHeight: 800,
+      useWebWorker: true,
+    };
 
-    // Wait for all FileReader promises to resolve and update the selectedFiles state
-    Promise.all(fileReaders).then((dataURLs) => {
-      setSelectedFiles((prevFiles) => [
-        ...prevFiles,
-        ...dataURLs.map((dataURL, index) => ({ dataURL, file: files[index] })),
-      ]);
-    });
+    const compressedFiles = await Promise.all(
+      Array.from(files).map(async (file) => {
+        try {
+          const compressedFile = await imageCompression(file, compressOptions);
+          return compressedFile;
+        } catch (error) {
+          console.error("Error compressing image:", error);
+          return file;
+        }
+      })
+    );
+
+    setSelectedFiles((prevFiles) => [
+      ...prevFiles,
+      ...compressedFiles.map((compressedFile, index) => ({
+        dataURL: URL.createObjectURL(compressedFile),
+        file: compressedFile,
+      })),
+    ]);
   };
-
   const handleRemoveFile = (index) => {
     // Remove the file at the specified index
     const updatedFiles = [...selectedFiles];
