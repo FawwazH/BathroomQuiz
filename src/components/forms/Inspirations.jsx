@@ -72,7 +72,7 @@ const Inspirations = () => {
       ...prevFiles,
       ...compressedFiles.map((compressedFile, index) => ({
         dataURL: URL.createObjectURL(compressedFile),
-        file: compressedFile,
+        file: { compressedFile, name: compressedFile.name },
       })),
     ]);
   };

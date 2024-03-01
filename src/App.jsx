@@ -17,6 +17,8 @@ import { setValid, setInvalid } from "./store/formSlice";
 
 import { useSelector, useDispatch } from "react-redux";
 
+import uploadImagesAndCreateRecords from "./store/formAction";
+
 const steps = [
   "Basic Information",
   "Style Preference",
@@ -35,24 +37,10 @@ const forms = [
 const App = () => {
   const dispatch = useDispatch();
   const bool = useSelector((state) => state.formValid.isValid);
+  const dataObject = useSelector((state) => state.formValid);
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set());
 
-  React.useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      // Clear local storage on page reload
-      localStorage.removeItem("selectedFiles");
-      localStorage.removeItem("bathroomImages");
-    };
-
-    // Attach the event listener
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    // Cleanup the event listener on component unmount
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
   React.useEffect(() => {
     if (isStepOptional(activeStep)) {
       dispatch(setValid());
@@ -70,6 +58,11 @@ const App = () => {
   };
 
   const handleNext = () => {
+    if (activeStep === steps.length - 1) {
+      const { inspirationImages, bathroomImages, isValid, ...filteredState } =
+        dataObject;
+      uploadImagesAndCreateRecords(filteredState);
+    }
     let newSkipped = skipped;
     if (isStepSkipped(activeStep)) {
       newSkipped = new Set(newSkipped.values());
