@@ -3,14 +3,15 @@ import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { useDispatch } from "react-redux";
-import { setValid, setInvalid } from "../../store/formSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { setValid, setInvalid, setBathroomPlans } from "../../store/formSlice";
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import imageCompression from "browser-image-compression";
+import FacebookCircularProgress from "../FacebookCircularProgress";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -29,7 +30,8 @@ const BathroomImages = () => {
   const [selectedFiles, setSelectedFiles] = React.useState([]);
   const [plan, setPlan] = React.useState("");
   const isMounted = React.useRef(false);
-
+  const [imageLoader, setImageLoader] = React.useState(false);
+  const bathroomPlans = useSelector((state) => state.formValid.bathroomPlans);
   React.useEffect(() => {
     // Load files from local storage on component mount
     const storedFiles =
@@ -51,10 +53,12 @@ const BathroomImages = () => {
   }, [selectedFiles, plan]);
 
   const handleChange = (event) => {
+    dispatch(setBathroomPlans(event.target.value));
     setPlan(event.target.value);
   };
 
   const handleFileChange = async (event) => {
+    setImageLoader(true);
     const files = event.target.files;
 
     if (files.length + selectedFiles.length > 3) {
@@ -87,6 +91,7 @@ const BathroomImages = () => {
         file: compressedFile,
       })),
     ]);
+    setImageLoader(false);
   };
 
   const handleRemoveFile = (index) => {
@@ -114,6 +119,7 @@ const BathroomImages = () => {
         />
       </Button>
       <p>Maximum three (3) images</p>
+      {imageLoader && <FacebookCircularProgress />}
 
       <ul
         style={{
@@ -132,6 +138,7 @@ const BathroomImages = () => {
                 maxWidth: "200px",
                 maxHeight: "200px",
                 marginRight: "10px",
+                display: !imageLoader ? "block" : "none",
               }}
             />
             <Typography variant="body2">{file.file.name}</Typography>
@@ -158,16 +165,16 @@ const BathroomImages = () => {
             label="Plans"
             onChange={handleChange}
           >
-            <MenuItem value={10}>
+            <MenuItem value="Actively considering a Bathroom Design">
               Actively considering a Bathroom Design
             </MenuItem>
-            <MenuItem value={20}>
+            <MenuItem value="Currently in the Process of Redesigning My Bathroom">
               Currently in the Process of Redesigning My Bathroom
             </MenuItem>
-            <MenuItem value={30}>
+            <MenuItem value="Exploring Ideas, No Immediate Redesign Plans">
               Exploring Ideas, No Immediate Redesign Plans
             </MenuItem>
-            <MenuItem value={40}>
+            <MenuItem value="Curious to See How My Bathroom Could Look">
               Curious to See How My Bathroom Could Look
             </MenuItem>
           </Select>

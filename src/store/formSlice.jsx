@@ -39,6 +39,9 @@ const formSlice = createSlice({
     setBathroomRestrictions: (state, action) => {
       state.bathroomRestrictions = action.payload;
     },
+    setBathroomPlans: (state, action) => {
+      state.bathroomPlans = action.payload;
+    },
   },
 });
 
@@ -52,6 +55,7 @@ export const {
   setInspirationImages,
   setColorPreference,
   setBathroomRestrictions,
+  setBathroomPlans,
 } = formSlice.actions;
 
 export default formSlice.reducer;

@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import { useSelector, useDispatch } from "react-redux";
 import { setColorPreference } from "../../store/formSlice";
 import imageCompression from "browser-image-compression";
+import FacebookCircularProgress from "../FacebookCircularProgress";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -26,6 +27,7 @@ const Inspirations = () => {
   );
   const isMounted = React.useRef(false);
   const [selectedFiles, setSelectedFiles] = React.useState([]);
+  const [imageLoader, setImageLoader] = React.useState(false);
 
   React.useEffect(() => {
     // Load files from local storage on component mount
@@ -43,6 +45,7 @@ const Inspirations = () => {
   }, [selectedFiles]);
 
   const handleFileChange = async (event) => {
+    setImageLoader(true);
     const files = event.target.files;
 
     if (files.length + selectedFiles.length > 3) {
@@ -75,6 +78,7 @@ const Inspirations = () => {
         file: { compressedFile, name: compressedFile.name },
       })),
     ]);
+    setImageLoader(false);
   };
   const handleRemoveFile = (index) => {
     // Remove the file at the specified index
@@ -105,7 +109,7 @@ const Inspirations = () => {
         />
       </Button>
       <p>Maximum three (3) images</p>
-
+      {imageLoader && <FacebookCircularProgress />}
       <ul
         style={{
           listStyle: "none",
@@ -123,6 +127,7 @@ const Inspirations = () => {
                 maxWidth: "200px",
                 maxHeight: "200px",
                 marginRight: "10px",
+                display: !imageLoader ? "block" : "none",
               }}
             />
             <Typography variant="body2">{file.file.name}</Typography>
