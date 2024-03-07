@@ -94,7 +94,7 @@ const Challenges = () => {
         Bathroom Restrictions, Challenges or General Comments
       </Typography>
       <Textarea
-        style={{ height: "150px" }}
+        style={{ height: "150px", width: "80%" }}
         aria-label="empty textarea"
         placeholder={`Bathroom restrictions, challenges, or general comments (Max ${maxCharacterLimit} characters)`}
         value={bathroomRestrictions}

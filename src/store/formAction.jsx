@@ -2,14 +2,16 @@ import { DataObject } from "@mui/icons-material";
 import { storage, db } from "../../firebase";
 import { collection, getDocs, addDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
-import { v4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 const uploadImagesAndCreateRecords = async (userInput) => {
   try {
     // Define an async function to handle the image upload
     const uploadImage = async (image, isInspirational) => {
       const path = isInspirational ? "inspirational-images" : "bathroom-images";
+      const uniqueIdentifier = uuidv4();
+      const uniqueFileName = `${uniqueIdentifier}_${image.file.name}`;
       // Creating a reference to the file
-      const imageRef = ref(storage, `${path}/${image.file.name}v4()`);
+      const imageRef = ref(storage, `${path}/${uniqueFileName}`);
 
       // Fetch the image Blob asynchronously
       const response = await fetch(image.dataURL);
@@ -73,6 +75,8 @@ const uploadImagesAndCreateRecords = async (userInput) => {
     createDBRecord(userInput, inspirtionalImagesRef, bathroomImagesRef);
   } catch (error) {
     console.error("Error uploading information:", error);
+    localStorage.removeItem("selectedFiles");
+    localStorage.removeItem("bathroomImages");
   }
 };
 

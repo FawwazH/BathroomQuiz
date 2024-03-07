@@ -6,6 +6,7 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import Email from "@mui/icons-material/Email";
 import Call from "@mui/icons-material/Call";
 import { useSelector, useDispatch } from "react-redux";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import {
   setFullName,
   setEmail,
@@ -15,6 +16,7 @@ import {
 } from "../../store/formSlice";
 
 const BasicInformation = () => {
+  const isMediumMobile = useMediaQuery("(max-width: 380px");
   const dispatch = useDispatch();
   const fullName = useSelector((state) => state.formValid.fullName);
   const emailAddress = useSelector((state) => state.formValid.emailAddress);
@@ -72,9 +74,11 @@ const BasicInformation = () => {
     }
   };
 
+  const dynamicWidth = isMediumMobile ? "98%" : "40%";
+
   return (
     <>
-      <Box sx={{ flexGrow: 1, width: "40%", margin: "2rem auto" }}>
+      <Box sx={{ flexGrow: 1, width: dynamicWidth, margin: "2rem auto" }}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Box sx={{ display: "flex", alignItems: "flex-end" }}>

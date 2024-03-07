@@ -10,13 +10,19 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-
 import Box from "@mui/material/Box";
 
+/*Responsiveness imports */
+import useMediaQuery from "@mui/material/useMediaQuery";
+import MobileStepper from "@mui/material/MobileStepper";
+import { useTheme } from "@mui/material/styles";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import Paper from "@mui/material/Paper";
+
+/*State imports */
 import { setValid, setInvalid } from "./store/formSlice";
-
 import { useSelector, useDispatch } from "react-redux";
-
 import uploadImagesAndCreateRecords from "./store/formAction";
 
 const steps = [
@@ -27,6 +33,8 @@ const steps = [
   "Upload Bathroom Images",
 ];
 
+const maxSteps = steps.length;
+
 const forms = [
   <BasicInformation />,
   <StylePreference />,
@@ -35,11 +43,24 @@ const forms = [
   <BathroomImages />,
 ];
 const App = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery("(max-width:600px)");
+  // const isMediumMobile = useMediaQuery("(max-width: 380px");
   const dispatch = useDispatch();
   const bool = useSelector((state) => state.formValid.isValid);
   const dataObject = useSelector((state) => state.formValid);
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set());
+
+  React.useEffect(() => {
+    const clearLocalStorageOnUnload = () => {
+      localStorage.clear();
+    };
+    window.addEventListener("beforeunload", clearLocalStorageOnUnload);
+    return () => {
+      window.removeEventListener("beforeunload", clearLocalStorageOnUnload);
+    };
+  }, []);
 
   React.useEffect(() => {
     if (isStepOptional(activeStep)) {
@@ -77,21 +98,6 @@ const App = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  // const handleSkip = () => {
-  //   if (!isStepOptional(activeStep)) {
-  //     // You probably want to guard against something like this,
-  //     // it should never occur unless someone's actively trying to break something.
-  //     throw new Error("You can't skip a step that isn't optional.");
-  //   }
-
-  //   setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  //   setSkipped((prevSkipped) => {
-  //     const newSkipped = new Set(prevSkipped.values());
-  //     newSkipped.add(activeStep);
-  //     return newSkipped;
-  //   });
-  // };
-
   const handleReset = () => {
     setActiveStep(0);
   };
@@ -100,27 +106,61 @@ const App = () => {
     <>
       <h2>Bathroom Quiz</h2>
       <Box sx={{ width: "100%" }}>
-        <Stepper activeStep={activeStep}>
-          {steps.map((label, index) => {
-            const stepProps = {};
-            const labelProps = {};
-            if (isStepOptional(index)) {
-              labelProps.optional = (
-                <Typography variant="caption">Optional</Typography>
+        {!isMobile ? (
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, index) => {
+              const stepProps = {};
+              const labelProps = {};
+              if (isStepOptional(index)) {
+                labelProps.optional = (
+                  <Typography variant="caption">Optional</Typography>
+                );
+              }
+              if (isStepSkipped(index)) {
+                stepProps.completed = false;
+              }
+              return (
+                <Step key={label} {...stepProps}>
+                  <StepLabel {...labelProps}>{label}</StepLabel>
+                </Step>
               );
-            }
-            if (isStepSkipped(index)) {
-              stepProps.completed = false;
-            }
-            return (
-              <Step key={label} {...stepProps}>
-                <StepLabel {...labelProps}>{label}</StepLabel>
-              </Step>
-            );
-          })}
-        </Stepper>
+            })}
+          </Stepper>
+        ) : (
+          <Box sx={{ width: "100%" }}>
+            <MobileStepper
+              variant="text"
+              steps={maxSteps}
+              position="static"
+              activeStep={activeStep}
+              nextButton={
+                <Button size="small" onClick={handleNext} disabled={!bool}>
+                  Next
+                  {theme.direction === "rtl" ? (
+                    <KeyboardArrowLeft />
+                  ) : (
+                    <KeyboardArrowRight />
+                  )}
+                </Button>
+              }
+              backButton={
+                <Button
+                  size="small"
+                  onClick={handleBack}
+                  disabled={activeStep === 0}
+                >
+                  {theme.direction === "rtl" ? (
+                    <KeyboardArrowRight />
+                  ) : (
+                    <KeyboardArrowLeft />
+                  )}
+                  Back
+                </Button>
+              }
+            />
+          </Box>
+        )}
         {forms[activeStep]}
-
         {activeStep === steps.length ? (
           <React.Fragment>
             <Typography sx={{ mt: 2, mb: 1, mx: "auto" }}>
@@ -133,28 +173,30 @@ const App = () => {
             </Box>
           </React.Fragment>
         ) : (
-          <React.Fragment>
-            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-              <Button
-                color="inherit"
-                disabled={activeStep === 0}
-                onClick={handleBack}
-                sx={{ mr: 1 }}
-              >
-                Back
-              </Button>
-              <Box sx={{ flex: "1 1 auto" }} />
-              {/* {isStepOptional(activeStep) && (
-                <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-                  Skip
+          !isMobile && (
+            <React.Fragment>
+              <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                <Button
+                  color="inherit"
+                  disabled={activeStep === 0}
+                  onClick={handleBack}
+                  sx={{ mr: 1 }}
+                >
+                  Back
                 </Button>
-              )} */}
+                <Box sx={{ flex: "1 1 auto" }} />
+                {/* {isStepOptional(activeStep) && (
+            <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
+              Skip
+            </Button>
+          )} */}
 
-              <Button onClick={handleNext} disabled={!bool}>
-                {activeStep === steps.length - 1 ? "Finish" : "Next"}
-              </Button>
-            </Box>
-          </React.Fragment>
+                <Button onClick={handleNext} disabled={!bool}>
+                  {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                </Button>
+              </Box>
+            </React.Fragment>
+          )
         )}
       </Box>
     </>
