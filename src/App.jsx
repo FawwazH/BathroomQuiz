@@ -43,6 +43,9 @@ const forms = [
   <BathroomImages />,
 ];
 const App = () => {
+  const smilingEmoji = "\u{1F600}";
+  const bathroomEmoji = "\u{1F6C1}";
+  const lightBulbEmoji = "\u{1F4A1}";
   const theme = useTheme();
   const isMobile = useMediaQuery("(max-width:600px)");
   // const isMediumMobile = useMediaQuery("(max-width: 380px");
@@ -104,7 +107,9 @@ const App = () => {
 
   return (
     <>
-      <h2>Bathroom Quiz</h2>
+      <h2>
+        Lumi Bathroom Quiz {lightBulbEmoji} {bathroomEmoji}
+      </h2>
       <Box sx={{ width: "100%" }}>
         {!isMobile ? (
           <Stepper activeStep={activeStep}>
@@ -165,7 +170,7 @@ const App = () => {
           <React.Fragment>
             <Typography sx={{ mt: 2, mb: 1, mx: "auto" }}>
               Thank you for your information. We will be in contact with you
-              soon.
+              soon. {smilingEmoji}
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
               <Box sx={{ flex: "1 1 auto" }} />

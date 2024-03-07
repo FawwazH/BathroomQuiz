@@ -65,10 +65,10 @@ const uploadImagesAndCreateRecords = async (userInput) => {
       bathroomImages.map((image) => uploadImage(image, false))
     );
     /*Image ref */
-    console.log(bathroomImagesRef);
+    //console.log(bathroomImagesRef);
 
     /*User input */
-    console.log(userInput);
+    //console.log(userInput);
     localStorage.removeItem("bathroomImages");
 
     //Finally adding firestore reference
